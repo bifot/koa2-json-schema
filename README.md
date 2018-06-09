@@ -20,12 +20,12 @@ $ npm test
 const Koa = require('koa')
 const Router = require('koa-router')
 const bodyParser = require('koa-bodyparser')
-const jsonValidator = require('koa2-json-schema')
+const jsonSchema = require('koa2-json-schema')
 
 const app = new Koa()
 const router = new Router()
 
-router.post('/users', jsonValidator({
+router.post('/users', jsonSchema({
   first_name: 'string',
   last_name: 'string',
   phone: 'number',

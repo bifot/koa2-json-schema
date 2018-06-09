@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const jsonValidator = require('./')
+const jsonSchema = require('./')
 
 const applyMiddleware = (middleware, body) => {
   const ctx = {
@@ -17,7 +17,7 @@ const applyMiddleware = (middleware, body) => {
 describe('koa json schema', () => {
   it('send body with correct data', () => {
     const { next } = applyMiddleware(
-      jsonValidator({
+      jsonSchema({
         name: 'string',
         phone: 'number',
         hobbies: 'array'
@@ -37,7 +37,7 @@ describe('koa json schema', () => {
 
   it('send body with incorrect data', () => {
     const { ctx, next } = applyMiddleware(
-      jsonValidator({
+      jsonSchema({
         hobbies: 'array',
         name: 'string'
       }),
