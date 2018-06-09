@@ -29,7 +29,12 @@ router.post('/users', jsonSchema({
   first_name: 'string',
   last_name: 'string',
   phone: 'number',
-  hobbies: 'array',
+  hobbies: {
+    type: 'array',
+    items: {
+      type: 'string'
+    }
+  },
   city: 'object'
 }), (ctx) => {
   // API...

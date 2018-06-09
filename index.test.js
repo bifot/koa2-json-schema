@@ -16,17 +16,21 @@ const applyMiddleware = (middleware, body) => {
 
 describe('koa json schema', () => {
   it('send body with correct data', () => {
-    const { next } = applyMiddleware(
+    const { ctx, next } = applyMiddleware(
       jsonSchema({
         name: 'string',
         phone: 'number',
-        hobbies: 'array'
+        hobbies: {
+          type: 'array',
+          items: {
+            type: 'string'
+          }
+        }
       }),
       {
         name: 'Mikhail',
         phone: 79959978504,
         hobbies: [
-          'Football',
           'Basketball'
         ]
       }
