@@ -18,14 +18,14 @@ $ npm test
 
 ```js
 const Koa = require('koa')
+const Router = require('koa-router')
 const bodyParser = require('koa-bodyparser')
 const jsonValidator = require('koa2-json-schema')
 
 const app = new Koa()
+const router = new Router()
 
-app.use(bodyParser())
-
-app.post('/users', jsonValidator({
+router.post('/users', jsonValidator({
   first_name: 'string',
   last_name: 'string',
   phone: 'number',
@@ -34,6 +34,9 @@ app.post('/users', jsonValidator({
 }), (ctx) => {
   // API...
 })
+
+app.use(bodyParser())
+app.use(router.routes())
 
 app.listen(3000)
 ```
