@@ -1,0 +1,32 @@
+{
+  "name": "koa2-json-schema",
+  "version": "0.1.1",
+  "description": "Middleware for validate request body by JSON schemas.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha ./index.test.js --exit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bifot/koa2-json-schema.git"
+  },
+  "keywords": [
+    "koa",
+    "koa2",
+    "json",
+    "validate",
+    "validator",
+    "schema",
+    "body"
+  ],
+  "author": "Mikhail Semin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bifot/koa2-json-schema/issues"
+  },
+  "homepage": "https://github.com/bifot/koa2-json-schema#readme",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0"
+  }
+}
