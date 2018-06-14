@@ -16,7 +16,7 @@ const applyMiddleware = (middleware, body) => {
 
 describe('koa json schema', () => {
   it('send body with correct data', () => {
-    const { ctx, next } = applyMiddleware(
+    const { next } = applyMiddleware(
       jsonSchema({
         name: 'string',
         phone: 'number',
@@ -31,7 +31,33 @@ describe('koa json schema', () => {
           required: [
             'lng',
             'lat'
-          ]
+          ],
+          properties: {
+            lng: 'number',
+            lat: 'number'
+          }
+        },
+        preferences: {
+          type: 'object',
+          required: [
+            'mine'
+          ],
+          properties: {
+            mine: {
+              type: 'array',
+              items: {
+                type: 'object',
+                required: [
+                  'title',
+                  'score'
+                ],
+                properties: {
+                  title: 'string',
+                  score: 'number'
+                }
+              }
+            }
+          }
         }
       }),
       {
@@ -43,6 +69,14 @@ describe('koa json schema', () => {
         city: {
           lng: 15,
           lat: 15
+        },
+        preferences: {
+          mine: [
+            {
+              title: 'Football',
+              score: 2
+            }
+          ]
         }
       }
     )

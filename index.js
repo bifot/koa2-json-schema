@@ -7,12 +7,36 @@ class Validator {
     return typeof value === type && !Array.isArray(value)
   }
 
-  static hasRequiredFields (body, required) {
+  static hasRequiredFields (body, required, parentKey) {
     const errors = []
 
     for (const key of required) {
       if (!body[key]) {
-        errors.push(`${key} is required`)
+        errors.push(`${parentKey}.${key} is required`)
+      }
+    }
+
+    return errors
+  }
+
+  static isPropertiesValid (body, properties, parentKey) {
+    let errors = []
+
+    for (const [ key, value ] of Object.entries(properties)) {
+      const type = typeof value === 'string' ? { type: value } : value
+      const { items: itemsSchema } = type
+
+      if (!this.isTypeValid(body[key], type)) {
+        errors.push(`${parentKey}.${key} must be ${type.type}`)
+      }
+
+      if (Array.isArray(body[key]) && itemsSchema) {
+        const itemsErrors = this.validateItems(body[key], itemsSchema, parentKey)
+
+        errors = [
+          ...errors,
+          ...itemsErrors
+        ]
       }
     }
 
@@ -22,27 +46,31 @@ class Validator {
   static validate (body, schema) {
     let errors = []
 
-    for (const [ key, type ] of Object.entries(schema)) {
-      const objectType = typeof type === 'string'
-        ? { type }
-        : type
-      const { items: itemsSchema, required } = objectType
+    for (const [ key, value ] of Object.entries(schema)) {
+      const type = typeof value === 'string' ? { type: value } : value
+      const { items: itemsSchema, required = [], properties = {} } = type
 
-      if (!this.isTypeValid(body[key], objectType)) {
-        errors.push(`${key} must be ${type}`)
-      } else if (Array.isArray(body[key]) && itemsSchema) {
+      if (!this.isTypeValid(body[key], type)) {
+        errors.push(`${key} must be ${type.type}`)
+      }
+
+      if (Array.isArray(body[key]) && itemsSchema) {
         const itemsErrors = this.validateItems(body[key], itemsSchema, key)
 
         errors = [
           ...errors,
           ...itemsErrors
         ]
-      } else if (typeof body[key] === 'object' && !Array.isArray(body[key])) {
-        const requiredErrors = this.hasRequiredFields(body[key], required)
+      }
+
+      if (typeof body[key] === 'object' && !Array.isArray(body[key])) {
+        const requiredErrors = this.hasRequiredFields(body[key], required, key)
+        const propertiesErrors = this.isPropertiesValid(body[key], properties, key)
 
         errors = [
           ...errors,
-          ...requiredErrors
+          ...requiredErrors,
+          ...propertiesErrors
         ]
       }
     }
@@ -53,7 +81,7 @@ class Validator {
   static validateItems (items, type, key) {
     let errors = []
 
-    const { items: itemsSchema, required } = type
+    const { items: itemsSchema, required = [], properties = {} } = type
 
     if (!items.length) {
       errors.push(`${key}[0] must be ${type.type}`)
@@ -62,19 +90,25 @@ class Validator {
     items.forEach((item, i) => {
       if (!this.isTypeValid(item, type)) {
         errors.push(`${key}[${i}] must be ${type.type}`)
-      } else if (Array.isArray(item) && itemsSchema) {
+      }
+
+      if (Array.isArray(item) && itemsSchema) {
         const itemsErrors = this.validateItems(item, itemsSchema, `${key}[${i}]`)
 
         errors = [
           ...errors,
           ...itemsErrors
         ]
-      } else if (typeof item === 'object' && !Array.isArray(item)) {
-        const requiredErrors = this.hasRequiredFields(item, required)
+      }
+
+      if (typeof item === 'object' && !Array.isArray(item)) {
+        const requiredErrors = this.hasRequiredFields(item, required, key)
+        const propertiesErrors = this.isPropertiesValid(item, properties, key)
 
         errors = [
           ...errors,
-          ...requiredErrors
+          ...requiredErrors,
+          ...propertiesErrors
         ]
       }
     })
