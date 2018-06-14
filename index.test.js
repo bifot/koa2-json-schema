@@ -25,6 +25,13 @@ describe('koa json schema', () => {
           items: {
             type: 'string'
           }
+        },
+        city: {
+          type: 'object',
+          required: [
+            'lng',
+            'lat'
+          ]
         }
       }),
       {
@@ -32,7 +39,11 @@ describe('koa json schema', () => {
         phone: 79959978504,
         hobbies: [
           'Basketball'
-        ]
+        ],
+        city: {
+          lng: 15,
+          lat: 15
+        }
       }
     )
 
@@ -43,7 +54,7 @@ describe('koa json schema', () => {
     const { ctx, next } = applyMiddleware(
       jsonSchema({
         hobbies: 'array',
-        name: 'string'
+        name: 'string',
       }),
       {
         hobbies: 'football'

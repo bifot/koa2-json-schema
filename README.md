@@ -35,7 +35,13 @@ router.post('/users', jsonSchema({
       type: 'string'
     }
   },
-  city: 'object'
+  city: {
+    type: 'object',
+    required: [
+      'lng',
+      'lat'
+    ]
+  }
 }), (ctx) => {
   // API...
 })
