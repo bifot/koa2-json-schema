@@ -104,6 +104,8 @@ router.post('/users', jsonSchema({
   }
 }, true), (ctx) => { // flag is true
   // now you can handle errors from ctx.errors
+  // these are errors if the body is empty
+  // ctx.errors = [ 'preferences must be array' ]
 })
 ```
 
