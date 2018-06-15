@@ -102,4 +102,22 @@ describe('koa json schema', () => {
     ])
     expect(next).to.equal(false)
   })
+
+  it('send body with incorrect data w/ silent mode', () => {
+    const { ctx, next } = applyMiddleware(
+      jsonSchema({
+        hobbies: 'array',
+        name: 'string',
+      }, true),
+      {
+        hobbies: 'football'
+      }
+    )
+
+    expect(ctx.errors).to.deep.equal([
+      'hobbies must be array',
+      'name must be string'
+    ])
+    expect(next).to.equal(true)
+  })
 })

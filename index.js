@@ -116,15 +116,19 @@ class Validator {
     return errors
   }
 
-  static middleware (schema) {
+  static middleware (schema, silent) {
     return (ctx, next) => {
       const errors = Validator.validate(ctx.request.body, schema)
 
       if (errors.length) {
-        ctx.status = 400
-        ctx.body = { error: errors }
+        if (!silent) {
+          ctx.status = 400
+          ctx.body = { error: errors }
 
-        return false
+          return false
+        }
+
+        ctx.errors = errors
       }
 
       return next()
