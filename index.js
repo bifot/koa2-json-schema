@@ -30,7 +30,7 @@ class Validator {
     return errors
   }
 
-  isPropertiesValid (body, properties, parentKey) {
+  isPropertiesValid (body, properties, parentKey, index) {
     let errors = []
 
     for (const [ key, value ] of Object.entries(properties)) {
@@ -40,7 +40,7 @@ class Validator {
       if (!this.isTypeValid(body[key], type)) {
         errors.push(
           this.i18n('invalidValueType', {
-            property: `${parentKey}.${key}`,
+            property: index !== undefined ? `${parentKey}[${index}].${key}` : `${parentKey}.${key}`,
             type: type.type
           })
         )
@@ -141,7 +141,7 @@ class Validator {
       // If value is object, then check on required fields and properties valid
       if (typeof item === 'object' && !Array.isArray(item)) {
         const requiredErrors = this.hasRequiredFields(item, required, key)
-        const propertiesErrors = this.isPropertiesValid(item, properties, key)
+        const propertiesErrors = this.isPropertiesValid(item, properties, key, i)
 
         errors = [
           ...errors,
