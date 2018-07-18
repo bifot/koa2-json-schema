@@ -1,5 +1,12 @@
+const I18n = require('./i18n')
+const en = require('./locales/en')
+
 class Validator {
-  static isTypeValid (value, { type }) {
+  constructor (locales = en) {
+    this.i18n = I18n(locales)
+  }
+
+  isTypeValid (value, { type }) {
     if (type === 'array') {
       return Array.isArray(value)
     }
@@ -7,19 +14,23 @@ class Validator {
     return typeof value === type && !Array.isArray(value)
   }
 
-  static hasRequiredFields (body, required, parentKey) {
+  hasRequiredFields (body, required, parentKey) {
     const errors = []
 
     for (const key of required) {
       if (!body[key]) {
-        errors.push(`${parentKey}.${key} is required`)
+        errors.push(
+          this.i18n('propertyIsRequired', {
+            property: `${parentKey}.${key}`
+          })
+        )
       }
     }
 
     return errors
   }
 
-  static isPropertiesValid (body, properties, parentKey) {
+  isPropertiesValid (body, properties, parentKey) {
     let errors = []
 
     for (const [ key, value ] of Object.entries(properties)) {
@@ -27,9 +38,15 @@ class Validator {
       const { items: itemsSchema } = type
 
       if (!this.isTypeValid(body[key], type)) {
-        errors.push(`${parentKey}.${key} must be ${type.type}`)
+        errors.push(
+          this.i18n('invalidValueType', {
+            property: `${parentKey}.${key}`,
+            type: type.type
+          })
+        )
       }
 
+      // If value is array with schema, then validate recursively
       if (Array.isArray(body[key]) && itemsSchema) {
         const itemsErrors = this.validateItems(body[key], itemsSchema, parentKey)
 
@@ -43,7 +60,7 @@ class Validator {
     return errors
   }
 
-  static validate (body, schema) {
+  validate (body, schema) {
     let errors = []
 
     for (const [ key, value ] of Object.entries(schema)) {
@@ -51,9 +68,15 @@ class Validator {
       const { items: itemsSchema, required = [], properties = {} } = type
 
       if (!this.isTypeValid(body[key], type)) {
-        errors.push(`${key} must be ${type.type}`)
+        errors.push(
+          this.i18n('invalidValueType', {
+            property: key,
+            type: type.type
+          })
+        )
       }
 
+      // If value is array with schema, then validate recursively
       if (Array.isArray(body[key]) && itemsSchema) {
         const itemsErrors = this.validateItems(body[key], itemsSchema, key)
 
@@ -63,6 +86,7 @@ class Validator {
         ]
       }
 
+      // If value is object, then check on required fields and properties valid
       if (typeof body[key] === 'object' && !Array.isArray(body[key])) {
         const requiredErrors = this.hasRequiredFields(body[key], required, key)
         const propertiesErrors = this.isPropertiesValid(body[key], properties, key)
@@ -78,20 +102,33 @@ class Validator {
     return errors
   }
 
-  static validateItems (items, type, key) {
+  validateItems (items, type, key) {
     let errors = []
 
     const { items: itemsSchema, required = [], properties = {} } = type
 
+    // If array doesn't have items, then throw error
     if (!items.length) {
-      errors.push(`${key}[0] must be ${type.type}`)
+      errors.push(
+        this.i18n('invalidValueType', {
+          property: `${key}[0]`,
+          type: type.type
+        })
+      )
     }
 
     items.forEach((item, i) => {
+      // If type invalid, then throw error
       if (!this.isTypeValid(item, type)) {
-        errors.push(`${key}[${i}] must be ${type.type}`)
+        errors.push(
+          this.i18n('invalidValueType', {
+            property: `${key}[${i}]`,
+            type: type.type
+          })
+        )
       }
 
+      // If value is array with schema, then validate recursively
       if (Array.isArray(item) && itemsSchema) {
         const itemsErrors = this.validateItems(item, itemsSchema, `${key}[${i}]`)
 
@@ -101,6 +138,7 @@ class Validator {
         ]
       }
 
+      // If value is object, then check on required fields and properties valid
       if (typeof item === 'object' && !Array.isArray(item)) {
         const requiredErrors = this.hasRequiredFields(item, required, key)
         const propertiesErrors = this.isPropertiesValid(item, properties, key)
@@ -116,9 +154,9 @@ class Validator {
     return errors
   }
 
-  static middleware (schema, silent) {
+  middleware (schema, silent) {
     return (ctx, next) => {
-      const errors = Validator.validate(ctx.request.body, schema)
+      const errors = this.validate(ctx.request.body, schema)
 
       if (errors.length) {
         if (!silent) {
@@ -136,4 +174,9 @@ class Validator {
   }
 }
 
-module.exports = Validator.middleware
+module.exports = (locales) => {
+  const validator = new Validator(locales)
+
+  // Bind validator context to middleware
+  return validator.middleware.bind(validator)
+}
