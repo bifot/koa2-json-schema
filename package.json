@@ -1,6 +1,6 @@
 {
   "name": "koa2-json-schema",
-  "version": "0.1.5",
+  "version": "1.0.0",
   "description": "Middleware for validate request body by JSON schemas.",
   "main": "index.js",
   "scripts": {
