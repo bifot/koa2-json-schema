@@ -1,5 +1,7 @@
 const { expect } = require('chai')
-const jsonSchema = require('./')
+const I18n = require('./i18n')
+const en = require('./locales/en')
+const jsonSchema = require('./')()
 
 const applyMiddleware = (middleware, body) => {
   const ctx = {
@@ -13,6 +15,18 @@ const applyMiddleware = (middleware, body) => {
     ctx
   }
 }
+
+describe('i18n', () => {
+  it('generate message with variables', () => {
+    const i18n = I18n(en)
+    const message = i18n('invalidValueType', {
+      property: 'first_name',
+      type: 'string'
+    })
+
+    expect(message).to.equal('first_name must be string')
+  })
+})
 
 describe('koa json schema', () => {
   it('send body with correct data', () => {

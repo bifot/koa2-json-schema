@@ -20,7 +20,7 @@ $ npm test
 const Koa = require('koa')
 const Router = require('koa-router')
 const bodyParser = require('koa-bodyparser')
-const jsonSchema = require('koa2-json-schema')
+const jsonSchema = require('koa2-json-schema')()
 
 const app = new Koa()
 const router = new Router()
@@ -45,7 +45,7 @@ app.listen(3000)
 const Koa = require('koa')
 const Router = require('koa-router')
 const bodyParser = require('koa-bodyparser')
-const jsonSchema = require('koa2-json-schema')
+const jsonSchema = require('koa2-json-schema')()
 
 const app = new Koa()
 const router = new Router()
@@ -108,6 +108,30 @@ router.post('/users', jsonSchema({
   // ctx.errors = [ 'preferences must be array' ]
 })
 ```
+
+## Locales
+
+You can easily switch locales or create custom.
+
+**Native locales:**
+
+```js
+// import russian locales
+const ru = require('koa2-json-schema/locales/ru')
+// passed new locales into argument when require
+const jsonSchema = require('koa2-json-schema')(ru)
+```
+
+**Custom locales:**
+
+```js
+// %property% and %type% are dynamic variables
+const jsonSchema = require('koa2-json-schema')({
+  propertyIsRequired: '%property% is really required, bro 😞',
+  invalidValueType: '%property% must be %type% type 😊'
+})
+```
+
 
 ## License
 
