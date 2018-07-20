@@ -109,6 +109,22 @@ router.post('/users', jsonSchema({
 })
 ```
 
+## Strict mode
+
+You can enable strict mode which throw errors when client sent extra field in body. So, if you want enable strict mode, set `true` in third argument in `jsonSchema` function.
+
+```js
+router.post('/users', jsonSchema({
+  preferences: 'array'
+}, true, true), (ctx) => {
+  // ^ transfer errors is true, ^ strict mode is true (enable)
+  
+  // now you can handle errors from ctx.errors
+  // these are errors if the body is valid preferences and unsued field age
+  // ctx.errors = [ 'age field(s) are unused, you mustn\'t send them' ]
+})
+```
+
 ## Locales
 
 You can easily switch locales or create custom.
