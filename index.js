@@ -30,6 +30,14 @@ class Validator {
     return errors
   }
 
+  hasExtraFields (body, schema) {
+    const keys = Object.keys(schema)
+
+    return Object.keys(body).filter((key) => {
+      return keys.indexOf(key) === -1
+    })
+  }
+
   isPropertiesValid (body, properties, parentKey, index) {
     let errors = []
 
@@ -154,14 +162,26 @@ class Validator {
     return errors
   }
 
-  middleware (schema, silent) {
+  middleware (schema, transferErrors, strictMode) {
     return (ctx, next) => {
       const errors = this.validate(ctx.request.body, schema)
 
+      if (strictMode) {
+        const extraFields = this.hasExtraFields(ctx.request.body, schema)
+
+        if (extraFields.length) {
+          errors.push(this.i18n('unusedFields', {
+            fields: extraFields.join(', ')
+          }))
+        }
+      }
+
       if (errors.length) {
-        if (!silent) {
+        if (!transferErrors) {
           ctx.status = 400
-          ctx.body = { error: errors }
+          ctx.body = {
+            error: errors
+          }
 
           return false
         }

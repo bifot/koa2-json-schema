@@ -117,7 +117,7 @@ describe('koa json schema', () => {
     expect(next).to.equal(false)
   })
 
-  it('send body with incorrect data w/ silent mode', () => {
+  it('send body with incorrect data and transfer errors to next middleware', () => {
     const { ctx, next } = applyMiddleware(
       jsonSchema({
         hobbies: 'array',
@@ -133,5 +133,23 @@ describe('koa json schema', () => {
       'name must be string'
     ])
     expect(next).to.equal(true)
+  })
+
+  it('send correct body with strict mode', () => {
+    const { ctx, next } = applyMiddleware(
+      jsonSchema({
+        name: 'string'
+      }, false, true),
+      {
+        name: 'Mikhail Semin',
+        age: 18 // unused field
+      }
+    )
+
+    expect(ctx.status).to.equal(400)
+    expect(ctx.body.error).to.deep.equal([
+      'age field(s) are unused, you mustn\'t send them'
+    ])
+    expect(next).to.equal(false)
   })
 })
